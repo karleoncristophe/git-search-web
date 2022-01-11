@@ -55,7 +55,7 @@ const Avatar = styled.img`
 interface Props {
   data: {
     login: string;
-    avatar_url: string;
+    avatar_url?: string;
     id: number;
   };
 }
@@ -79,7 +79,13 @@ const List: React.FC<Props> = ({ data }: Props) => {
           <Text>Id: {data?.id}</Text>
         </Informations>
         <div>
-          <Avatar src={`${data?.avatar_url}`} />
+          <Avatar
+            src={
+              data?.avatar_url
+                ? `${data?.avatar_url}`
+                : "https://cdn-icons-png.flaticon.com/512/5873/5873009.png"
+            }
+          />
         </div>
       </ListView>
       {visible === true ? (

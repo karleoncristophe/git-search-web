@@ -159,7 +159,13 @@ const Profile: React.FC<Props> = ({ close, username }: Props) => {
 
           <Content>
             <AvatarAndNameContent>
-              <Avatar src={`${user?.avatar_url}`} />
+              <Avatar
+                src={
+                  user?.avatar_url === "text/html"
+                    ? "https://cdn-icons-png.flaticon.com/512/5873/5873009.png"
+                    : `${user?.avatar_url}`
+                }
+              />
 
               <TitleName>{user?.name ? user?.name : "No Name"}</TitleName>
             </AvatarAndNameContent>

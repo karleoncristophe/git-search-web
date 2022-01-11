@@ -19,7 +19,7 @@ const Container = styled.div<any>`
   padding-top: 20px;
 
   @media (max-width: 980px) {
-    width: 93%;
+    width: 100%;
   }
 `;
 
@@ -29,6 +29,13 @@ const TitleAndAvatarContent = styled.div<any>`
   display: flex;
   align-items: center;
   flex-direction: column;
+  padding-left: 20px;
+  padding-right: 30px;
+
+  @media (max-width: 400px) {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
 `;
 
 const Div = styled.div`
@@ -96,8 +103,6 @@ const Button = styled.button`
   width: 70px;
 `;
 
-const Navigation = styled.button``;
-
 const ImageButton = styled.img`
   width: 25px;
   height: 25px;
@@ -105,14 +110,39 @@ const ImageButton = styled.img`
 
 const ListViewContent = styled.div`
   display: flex;
-  width: 100%;
   flex-direction: column;
+  overflow: scroll;
+  padding-left: 20px;
+  padding-right: 20px;
+
+  ::-webkit-scrollbar {
+    display: flex;
+    height: 0px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #52b788;
+  }
+
+  @media (max-width: 400px) {
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  }
+`;
+
+const Load = styled.li`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  width: 100%;
+  color: white;
 `;
 
 const Home: React.FC = () => {
   const [search, setSearch] = useState("");
   const [filteredUSers, setFilteredUsers] = useState<any>([]);
-  const { users, loading, getUserRepos } = useContext(UsersContext);
+  const { users, setPage } = useContext(UsersContext);
 
   useEffect(() => {
     setFilteredUsers(
@@ -122,6 +152,16 @@ const Home: React.FC = () => {
       })
     );
   }, [search, users]);
+
+  useEffect(() => {
+    const intersectionObserver: any = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        setPage((currentValue: any) => currentValue + 1);
+      }
+    });
+    intersectionObserver.observe(document.querySelector("#id"));
+    return () => intersectionObserver.disconnect();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Wrapper>
@@ -145,9 +185,12 @@ const Home: React.FC = () => {
           </TextAndSearchContent>
         </TitleAndAvatarContent>
         <ListViewContent>
-          {users?.map((item, key) => (
+          {filteredUSers?.map((item: any, key: any) => (
             <List key={item.id + key.toString()} data={item} />
           ))}
+          <Load id="id">
+            <h1>Loading...</h1>.
+          </Load>
         </ListViewContent>
       </Container>
     </Wrapper>

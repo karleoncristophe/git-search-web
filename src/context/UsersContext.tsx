@@ -3,15 +3,15 @@ import React, { createContext, ReactNode, useEffect, useState } from "react";
 
 interface Users {
   login: string;
-  avatar_url: string;
+  avatar_url?: string;
   id: number;
 }
 
 type UsersContextValue = {
   users: Users[] | undefined;
-  loading: boolean;
   setUsers: (data: Users[]) => void;
-  getUserRepos: () => void;
+  setPage: (currentvalue: any) => void;
+  page: number;
 };
 
 interface Props {
@@ -22,33 +22,43 @@ export const UsersContext = createContext({} as UsersContextValue);
 
 const UsersProvider = (props: Props) => {
   const [users, setUsers] = useState<Users[]>([]);
-
-  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-
-  const baseURL: string = "https://api.github.com";
-  const perPage: number = 15;
-
-  const getUserRepos = async () => {
-    if (loading) {
-      return;
-    }
-    setLoading(true);
-    const { data } = await axios.get(
-      `${baseURL}/users/Intrepidd/followers?page=${page}&per_page=${perPage}`
-    );
-
-    setUsers([...users, ...data]);
-    setPage(page + 1);
-    setLoading(false);
-  };
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getUserRepos();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const getUsers = async () => {
+      try {
+        const baseURL: string = "https://api.github.com";
+        const perPage: number = 10;
+
+        if (loading) {
+          return;
+        }
+        setLoading(true);
+        const { data } = await axios.get(
+          `${baseURL}/users/mojombo/followers?page=${page}&per_page=${perPage}`
+        );
+        setUsers([...users, ...data]);
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getUsers();
+  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const intersectionObserver: any = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        setPage((currentValue: any) => currentValue + 1);
+      }
+    });
+    intersectionObserver.observe(document.querySelector("#id"));
+    return () => intersectionObserver.disconnect();
+  }, []);
 
   return (
-    <UsersContext.Provider value={{ users, setUsers, getUserRepos, loading }}>
+    <UsersContext.Provider value={{ users, setUsers, setPage, page }}>
       {props.children}
     </UsersContext.Provider>
   );
